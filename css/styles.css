@@ -1,0 +1,513 @@
+body {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* overlay para la visualizacion movil */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1020;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* sección Hero */
+.hero-section {
+    position: relative;
+    height: 500px;
+    margin-bottom: 50px;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    width: 100%;
+    padding: 20px;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero-text p {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+/* aca estan todas las tarjetas */
+.card {
+    height: 100%;
+    border: none;
+    border-radius: 15px;
+    background: #ffffff;
+    border-top: 5px solid transparent;
+    padding: 20px;
+}
+
+/* colores de las tarjetas */
+.card-adopcion { border-top-color: #4CAF50; }
+.card-transito { border-top-color: #2196F3; }
+.card-perdidas { border-top-color: #F44336; }
+.card-reportar { border-top-color: #FF9800; }
+.card-donacion { border-top-color: #9C27B0; }
+
+/* contenido de las tarjetas */
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #666;
+}
+
+.card-title {
+    color: #1B4965;
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.card-text {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.card-body {
+    padding: 1rem;
+    text-align: center;
+}
+
+/* aca estan todos los botones */
+.btn-adoptar {
+    background-color: #5BC0BE;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.btn-adoptar:hover {
+    background-color: #4CA5A3;
+    color: white;
+}
+
+/* aca estan todas las tablas */
+.table td {
+    vertical-align: middle;
+}
+
+.table-solicitudes {
+    background-color: white;
+    border-radius: 8px;
+}
+
+.table-solicitudes th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.table-solicitudes td {
+    padding: 12px;
+}
+
+/* chat */
+.chat-messages {
+    height: 60vh;
+    overflow-y: auto;
+    padding: 15px;
+    background-color: #fff;
+}
+
+.chat-message {
+    margin-bottom: 15px;
+    max-width: 70%;
+}
+
+.chat-message.sent {
+    margin-left: auto;
+}
+
+.chat-message.received {
+    margin-right: auto;
+}
+
+.message-content {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+}
+
+.chat-message.sent .message-content {
+    background-color: #007bff;
+    color: white;
+}
+
+.message-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+/* layout */
+.container {
+    padding: 2rem 0;
+}
+
+/* mascotas */
+.mascota-card {
+    border-radius: 10px;
+    background: white;
+    margin-bottom: 20px;
+}
+
+.mascota-imagen {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.mascota-info {
+    padding: 15px;
+    background-color: #f8f9fa;
+}
+
+/* sidebar y navegación responsive */
+.sidebar {
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: white;
+    padding: 20px;
+    border-right: 1px solid #dee2e6;
+    transition: transform 0.3s ease;
+    z-index: 1030;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 20px;
+}
+
+.sidebar-header h4 {
+    margin: 0;
+    color: #1B4965;
+}
+
+.close-sidebar {
+    display: none;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 1.2rem;
+    padding: 5px;
+}
+
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1040;
+    background-color: #5BC0BE;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.content {
+    margin-left: 250px;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+/* navegación */
+.nav-link {
+    color: #495057;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link:hover {
+    background-color: #f8f9fa;
+    color: #1B4965;
+    text-decoration: none;
+}
+
+.nav-link i {
+    width: 20px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+/* botones adicionales */
+.btn-nueva,
+.btn-publicar {
+    background-color: #5BC0BE;
+    color: white;
+    transition: background-color 0.2s ease;
+}
+
+.btn-nueva:hover,
+.btn-publicar:hover {
+    background-color: #4CA5A3;
+    color: white;
+}
+
+.btn-editar {
+    background-color: #6C757D;
+    color: white;
+    transition: background-color 0.2s ease;
+}
+
+.btn-editar:hover {
+    background-color: #5a6268;
+    color: white;
+}
+
+.btn-eliminar {
+    background-color: #DC3545;
+    color: white;
+    transition: background-color 0.2s ease;
+}
+
+.btn-eliminar:hover {
+    background-color: #c82333;
+    color: white;
+}
+
+/* modal */
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* estilos para detalle_mascota.php */
+.detalle-mascota-container {
+    min-height: 600px;
+    margin-top: 20px;
+}
+
+.detalle-mascota-imagen {
+    width: 100%;
+    height: 600px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.detalle-mascota-card {
+    height: 600px;
+}
+
+.detalle-mascota-card .card-header {
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+}
+
+.detalle-mascota-card .card-header h4 {
+    margin: 0;
+    font-weight: bold;
+    color: #1B4965;
+}
+
+.detalle-mascota-card .table-borderless th {
+    width: 130px;
+    color: #666;
+    padding: 15px 20px;
+}
+
+.detalle-mascota-card .table-borderless td {
+    padding: 15px 20px;
+}
+
+.detalle-mascota-card .btn-primary {
+    background-color: #5BC0BE;
+    border-color: #5BC0BE;
+    padding: 12px;
+    font-weight: 500;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.detalle-mascota-card .btn-primary:hover {
+    background-color: #4CA5A3;
+    border-color: #4CA5A3;
+}
+
+.detalle-mascota-card.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* media queries para responsive (IMPORTANTE) no eliminar nada porque se rompe la parte responsive. */
+@media (max-width: 991px) {
+    /* ajustes del sidebar */
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .close-sidebar {
+        display: block;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    /* ajuste del contenido principal */
+    .content {
+        margin-left: 0;
+        padding-top: 60px;
+    }
+
+    /* ajustes de tabla */
+    .table-responsive {
+        margin-top: 20px;
+    }
+
+    .table td, .table th {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    .table .btn {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        margin: 2px;
+    }
+
+    /* ajustes de botones */
+    .btn-nueva {
+        margin-bottom: 15px;
+        width: 100%;
+    }
+
+    /* ajustes del hero */
+    .hero-section {
+        height: 300px;
+    }
+
+    .hero-text h1 {
+        font-size: 2rem;
+    }
+
+    .hero-text p {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* ajustes para celulares mas chicos */
+    .hero-text h1 {
+        font-size: 1.5rem;
+    }
+
+    .hero-text p {
+        font-size: 1rem;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+    }
+
+    /* ahustes de tabla para celulares */
+    .table th:nth-child(2),
+    .table td:nth-child(2),
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        display: none;
+    }
+
+    /* botones en tabla */
+    .table .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .detalle-mascota-imagen {
+        height: 300px;
+    }
+
+    .detalle-mascota-card {
+        height: auto;
+    }
+}
+
+/* estado del body cuando el sidebar está activo en móvil */
+body.sidebar-open {
+    overflow: hidden;
+}
+
+/* animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.sidebar.active {
+    animation: fadeIn 0.3s ease;
+}
+
+.requirements-list {
+    list-style: none;
+    padding-left: 0;
+}
+.requirements-list li {
+    padding: 3px 0;
+}
+.requirements-list li::before {
+    content: '❌';
+    margin-right: 5px;
+}
+.requirements-list li.valid::before {
+    content: '✅';
+}
+.invalid {
+    color: #dc3545;
+}
+.valid {
+    color: #198754;
+}
