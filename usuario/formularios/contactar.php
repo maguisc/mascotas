@@ -6,7 +6,7 @@ include '../../config/database.php';
 include '../includes/header.php';
 include '../auth/verificar_sesion.php';
 
-// Verificar si se proporcionó un ID de mascota
+// Redirigir si no hay ID de mascota
 if (!isset($_GET['id'])) {
     header("Location: ../index.php");
     exit();
@@ -14,7 +14,7 @@ if (!isset($_GET['id'])) {
 
 $id_mascota = $_GET['id'];
 
-// obtener información de la mascota
+// Obtener nombre de la mascota
 $sql = "SELECT nombre FROM mascotas WHERE id_mascota = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_mascota);
@@ -35,11 +35,10 @@ $mascota = $result->fetch_assoc();
                         <input type="hidden" name="id_mascota" value="<?php echo $id_mascota; ?>">
                         <input type="hidden" name="id_usuario" value="<?php echo $_SESSION['usuario_id']; ?>">
 
-                        <!-- Información personal del usuario -->
+                        <!-- Datos personales -->
                         <div class="mb-3">
                             <label for="nombre_completo" class="form-label">Nombre y apellido</label>
-                            <input type="text" class="form-control" id="nombre_completo" name="nombre_completo"
-                                required>
+                            <input type="text" class="form-control" id="nombre_completo" name="nombre_completo" required>
                         </div>
 
                         <div class="mb-3">
@@ -52,7 +51,7 @@ $mascota = $result->fetch_assoc();
                             <input type="tel" class="form-control" id="telefono" name="telefono" required>
                         </div>
 
-                        <!-- Información sobre el avistamiento de la mascota -->
+                        <!-- Datos del avistamiento -->
                         <div class="mb-3">
                             <label for="ubicacion_vista" class="form-label">¿Dónde viste a la mascota?</label>
                             <input type="text" class="form-control" id="ubicacion_vista" name="ubicacion_vista"
@@ -67,11 +66,10 @@ $mascota = $result->fetch_assoc();
                         <div class="mb-3">
                             <label for="informacion_adicional" class="form-label">Información adicional</label>
                             <textarea class="form-control" id="informacion_adicional" name="informacion_adicional"
-                                rows="3"
-                                placeholder="Cuéntanos más detalles que puedan ayudar a encontrarla"></textarea>
+                                rows="3" placeholder="Cuéntanos más detalles que puedan ayudar a encontrarla"></textarea>
                         </div>
 
-                        <!-- botones -->
+                        <!-- Botones de acción -->
                         <div class="d-flex justify-content-center gap-3">
                             <button type="submit" class="btn btn-primary">Enviar información</button>
                             <a href="../detalle_mascota.php?id=<?php echo $id_mascota; ?>"
@@ -85,11 +83,10 @@ $mascota = $result->fetch_assoc();
 </div>
 
 <script>
-    // establecer la fecha máxima como hoy
+    // Establecer fecha máxima como hoy
     document.getElementById('fecha_vista').max = new Date().toISOString().split("T")[0];
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

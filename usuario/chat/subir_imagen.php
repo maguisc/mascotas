@@ -4,55 +4,41 @@ include '../auth/verificar_sesion.php';
 
 header('Content-Type: application/json');
 
+// Verificar datos
 if (!isset($_FILES['image']) || !isset($_POST['chat_id'])) {
-    echo json_encode(['success' => false, 'error' => 'No se proporcionó imagen o ID de chat']);
+    echo json_encode(['success' => false]);
     exit;
 }
 
-$chat_id = $_POST['chat_id'];
-$file = $_FILES['image'];
-$allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+$idChat = $_POST['chat_id'];
+$archivo = $_FILES['image'];
 
-if (!in_array($file['type'], $allowed_types)) {
-    echo json_encode(['success' => false, 'error' => 'Tipo de archivo no permitido']);
+// Verificación
+$consultaVerificar = "SELECT 1 FROM chats WHERE id_chat = ? AND id_usuario = ?";
+$stmtVerificar = $conn->prepare($consultaVerificar);
+$stmtVerificar->bind_param("ii", $idChat, $_SESSION['usuario_id']);
+$stmtVerificar->execute();
+if ($stmtVerificar->get_result()->num_rows === 0) {
+    echo json_encode(['success' => false]);
     exit;
 }
 
-$upload_dir = '../../uploads/chat/';
-if (!file_exists($upload_dir)) {
-    mkdir($upload_dir, 0777, true);
+// Crear directorio si no existe
+$directorio = '../../uploads/chat/';
+if (!file_exists($directorio)) {
+    mkdir($directorio, 0777, true);
 }
 
-$filename = uniqid() . '_' . basename($file['name']);
-$upload_path = $upload_dir . $filename;
+// Guardar archivo
+$nombreArchivo = uniqid() . '_' . $archivo['name'];
+$rutaCompleta = $directorio . $nombreArchivo;
 
-if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-    // guardar el mensaje con la imagen en la base de datos
-    $query = "INSERT INTO mensajes (id_chat, id_emisor, tipo_emisor, mensaje, imagen_url) 
-              VALUES (?, ?, 'usuario', 'Imagen enviada', ?)";
-    
-    $relative_path = 'uploads/chat/' . $filename;
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("iis", $chat_id, $_SESSION['usuario_id'], $relative_path);
-    
-    if ($stmt->execute()) {
-        echo json_encode([
-            'success' => true,
-            'url' => $relative_path
-        ]);
-    } else {
-        echo json_encode([
-            'success' => false,
-            'error' => 'Error al guardar en la base de datos'
-        ]);
-    }
-    $stmt->close();
-} else {
+if (move_uploaded_file($archivo['tmp_name'], $rutaCompleta)) {
     echo json_encode([
-        'success' => false,
-        'error' => 'Error al subir la imagen'
+        'success' => true,
+        'url' => 'uploads/chat/' . $nombreArchivo
     ]);
+} else {
+    echo json_encode(['success' => false]);
 }
-
-$conn->close();
 ?>

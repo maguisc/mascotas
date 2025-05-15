@@ -5,7 +5,7 @@ if (session_status() == PHP_SESSION_NONE) {
 include '../config/database.php';
 include 'includes/header.php';
 
-// verificar si se proporcionó un ID de mascota
+// Redirigir si no hay ID de mascota
 if (!isset($_GET['id'])) {
     header("Location: index.php");
     exit();
@@ -13,7 +13,7 @@ if (!isset($_GET['id'])) {
 
 $id_mascota = $_GET['id'];
 
-// obtener los detalles de la mascota
+// Obtener detalles de la mascota
 $sql = "SELECT m.*, p.tipo_publicacion 
         FROM mascotas m 
         INNER JOIN publicaciones p ON m.id_mascota = p.id_mascota 
@@ -31,24 +31,16 @@ if ($result->num_rows === 0) {
 $mascota = $result->fetch_assoc();
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle de Mascota - <?php echo $mascota['nombre']; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/mascotas/css/styles.css" rel="stylesheet">
-</head>
-<body>
-
 <div class="container">
     <div class="row detalle-mascota-container">
+        <!-- Imagen de la mascota -->
         <div class="col-md-6">
             <img src="<?php echo '../' . $mascota['imagen']; ?>" 
-                 class="detalle-mascota-imagen" 
-                 alt="<?php echo $mascota['nombre']; ?>">
+                class="detalle-mascota-imagen" 
+                alt="<?php echo $mascota['nombre']; ?>">
         </div>
+        
+        <!-- Información y botones -->
         <div class="col-md-6">
             <div class="card detalle-mascota-card">
                 <div class="card-header">
@@ -90,6 +82,7 @@ $mascota = $result->fetch_assoc();
                         </tr>
                     </table>
 
+                    <!-- Botón de acción según tipo de publicación -->
                     <?php if($mascota['tipo_publicacion'] == 'Adopción'): ?>
                         <button class="btn btn-primary" onclick="location.href='formularios/formulario_adopcion.php?id=<?php echo $id_mascota; ?>'">
                             Enviar formulario de Adopción
@@ -109,11 +102,8 @@ $mascota = $result->fetch_assoc();
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-
 <?php
 $stmt->close();
 $conn->close();
+include 'includes/sidebar.php';
 ?>

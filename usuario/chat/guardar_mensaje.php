@@ -2,47 +2,41 @@
 include '../../config/database.php';
 include '../auth/verificar_sesion.php';
 
-header('Content-Type: application/json');
+// Obtener datos
+$idChat = $_POST['id_chat'] ?? 0;
+$mensaje = $_POST['mensaje'] ?? '';
+$imagenUrl = $_POST['imagen_url'] ?? '';
+$tipoEmisor = 'usuario';
+$respuesta = ["success" => false];
 
-$data = json_decode(file_get_contents('php://input'), true);
-
-if (!isset($data['chat_id']) || !isset($data['mensaje'])) {
-    echo json_encode(['success' => false, 'error' => 'Faltan datos']);
-    exit;
+// Validación
+if (!$idChat || (empty($mensaje) && empty($imagenUrl))) {
+  echo json_encode($respuesta);
+  exit;
 }
 
-$chat_id = $data['chat_id'];
-$mensaje = $data['mensaje'];
-$tipo_emisor = 'usuario';
-
-$query = "INSERT INTO mensajes (id_chat, id_emisor, tipo_emisor, mensaje, nombre_emisor, email_emisor) 
-            VALUES (?, ?, ?, ?, ?, ?)";
-
-$stmt = $conn->prepare($query);
-$stmt->bind_param("iissss", 
-    $chat_id, 
-    $_SESSION['usuario_id'], 
-    $tipo_emisor, 
-    $mensaje,
-    $_SESSION['usuario_nombre'],
-    $_SESSION['usuario_email']
-);
-
-if ($stmt->execute()) {
-    // Actualizar último mensaje del chat
-    $update_query = "UPDATE chats 
-                    SET ultimo_mensaje = ?, 
-                        fecha_ultimo_mensaje = NOW() 
-                    WHERE id_chat = ?";
-    $update_stmt = $conn->prepare($update_query);
-    $update_stmt->bind_param("si", $mensaje, $chat_id);
-    $update_stmt->execute();
-    
-    echo json_encode(['success' => true]);
-} else {
-    echo json_encode(['success' => false, 'error' => 'Error al guardar mensaje']);
+// Verificación
+$consultaVerificar = "SELECT 1 FROM chats WHERE id_chat = ? AND id_usuario = ?";
+$stmtVerificar = $conn->prepare($consultaVerificar);
+$stmtVerificar->bind_param("ii", $idChat, $_SESSION['usuario_id']);
+$stmtVerificar->execute();
+if ($stmtVerificar->get_result()->num_rows === 0) {
+  echo json_encode($respuesta);
+  exit;
 }
 
-$stmt->close();
-$conn->close();
+// Insertar mensaje
+$stmtInsertar = $conn->prepare("INSERT INTO mensajes (id_chat, tipo_emisor, mensaje, imagen_url) VALUES (?, ?, ?, ?)");
+$stmtInsertar->bind_param("isss", $idChat, $tipoEmisor, $mensaje, $imagenUrl);
+
+if ($stmtInsertar->execute()) {
+  // Actualizar chat
+  $textoResumen = !empty($imagenUrl) ? "[Imagen]" : $mensaje;
+  $conn->query("UPDATE chats SET ultimo_mensaje = '$textoResumen', fecha_ultimo_mesaje = NOW(), fecha_actualizacion = NOW() WHERE id_chat = $idChat");
+  
+  $respuesta["success"] = true;
+  $respuesta["mensaje_id"] = $stmtInsertar->insert_id;
+}
+
+echo json_encode($respuesta);
 ?>

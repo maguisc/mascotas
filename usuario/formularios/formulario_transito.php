@@ -6,7 +6,7 @@ include '../../config/database.php';
 include '../includes/header.php';
 include '../auth/verificar_sesion.php';
 
-// Verificar si se proporcionó un ID de mascota
+// Redirigir si no hay ID de mascota
 if (!isset($_GET['id'])) {
     header("Location: ../index.php");
     exit();
@@ -14,7 +14,7 @@ if (!isset($_GET['id'])) {
 
 $id_mascota = $_GET['id'];
 
-// Obtener información de la mascota
+// Obtener nombre de la mascota
 $sql = "SELECT nombre FROM mascotas WHERE id_mascota = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_mascota);
@@ -35,7 +35,7 @@ $mascota = $result->fetch_assoc();
                         <input type="hidden" name="id_mascota" value="<?php echo $id_mascota; ?>">
                         <input type="hidden" name="id_usuario" value="<?php echo $_SESSION['usuario_id']; ?>">
                         
-                        <!-- información personal -->
+                        <!-- Datos personales -->
                         <div class="mb-3">
                             <label for="nombre_completo" class="form-label">Nombre y apellido</label>
                             <input type="text" class="form-control" id="nombre_completo" name="nombre_completo" required>
@@ -59,10 +59,10 @@ $mascota = $result->fetch_assoc();
                         <div class="mb-3">
                             <label for="nombre_mascota" class="form-label">Nombre de la mascota para dar tránsito</label>
                             <input type="text" class="form-control" id="nombre_mascota" name="nombre_mascota" 
-                                   value="<?php echo htmlspecialchars($mascota['nombre']); ?>" readonly>
+                                value="<?php echo htmlspecialchars($mascota['nombre']); ?>" readonly>
                         </div>
 
-                        <!-- preguntas específicas para tránsito -->
+                        <!-- Preguntas específicas para tránsito -->
                         <div class="mb-3">
                             <label class="form-label">¿Puede cubrir gastos básicos de alimentación y cuidados?</label>
                             <div class="d-flex gap-3">
@@ -91,7 +91,7 @@ $mascota = $result->fetch_assoc();
                             </div>
                         </div>
 
-                        <!-- condiciones de vivienda -->
+                        <!-- Condiciones de vivienda -->
                         <div class="mb-4">
                             <label class="form-label">Condiciones de vivienda</label>
                             <div class="form-check">
@@ -112,7 +112,7 @@ $mascota = $result->fetch_assoc();
                             </div>
                         </div>
 
-                        <!-- botones -->
+                        <!-- Botones de acción -->
                         <div class="d-flex justify-content-center gap-3">
                             <button type="submit" class="btn btn-primary">Enviar formulario</button>
                             <a href="../detalle_mascota.php?id=<?php echo $id_mascota; ?>" class="btn btn-secondary">Cancelar</a>

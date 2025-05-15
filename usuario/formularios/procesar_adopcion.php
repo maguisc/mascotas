@@ -7,7 +7,7 @@ include '../../config/database.php';
 include '../auth/verificar_sesion.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Recoger los datos del formulario
+    // Obtener datos del formulario
     $id_mascota = $_POST['id_mascota'];
     $id_usuario = $_SESSION['usuario_id'];
     $nombre_completo = trim($_POST['nombre_completo']);
@@ -20,54 +20,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tipo_vivienda = $_POST['tipo_vivienda'];
 
     try {
-        // Preparar la consulta SQL
+        // Insertar datos en la base
         $sql = "INSERT INTO formularios_adopcion (
-                    id_mascota, 
-                    id_usuario, 
-                    nombre_completo, 
-                    email, 
-                    telefono, 
-                    direccion, 
-                    nombre_mascota,
-                    experiencia_previa, 
-                    acepta_visita, 
-                    tipo_vivienda
+                    id_mascota, id_usuario, nombre_completo, email, telefono, 
+                    direccion, nombre_mascota, experiencia_previa, acepta_visita, tipo_vivienda
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
         $stmt->bind_param(
             "iissssssss", 
-            $id_mascota, 
-            $id_usuario, 
-            $nombre_completo, 
-            $email, 
-            $telefono, 
-            $direccion, 
-            $nombre_mascota,
-            $experiencia_previa, 
-            $acepta_visita, 
-            $tipo_vivienda
+            $id_mascota, $id_usuario, $nombre_completo, $email, $telefono, 
+            $direccion, $nombre_mascota, $experiencia_previa, $acepta_visita, $tipo_vivienda
         );
 
         if ($stmt->execute()) {
+            // Éxito
             $stmt->close();
             $conn->close();
             $_SESSION['success'] = "¡Formulario de adopción enviado con éxito! Nos pondremos en contacto con vos a la brevedad.";
             header("Location: ../index.php");
             exit();
         } else {
-            $stmt->close();
             throw new Exception("Error al procesar la solicitud");
         }
 
     } catch (Exception $e) {
+        // Error
         $conn->close();
         $_SESSION['error'] = "Error al procesar el formulario: " . $e->getMessage();
         header("Location: formulario_adopcion.php?id=" . $id_mascota);
         exit();
     }
-
 } else {
+    // Acceso incorrecto
     $conn->close();
     header("Location: ../index.php");
     exit();

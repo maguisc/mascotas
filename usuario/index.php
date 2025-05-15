@@ -3,18 +3,7 @@ include 'includes/header.php';
 include '../config/database.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adoptame Saladillo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/mascotas/CSS/styles.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-
+<!-- Mensaje de éxito (si existe) -->
 <?php if(isset($_SESSION['success'])): ?>
     <div class="container mt-3">
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -27,20 +16,21 @@ include '../config/database.php';
     </div>
 <?php endif; ?>
 
+<!-- Banner principal -->
 <div class="hero-section">
-    <img src="/mascotas/uploads/portada.jpg" alt="Portada Adoptame Saladillo" class="hero-image">
+    <img src="/mascotas/uploads/perroygato_portada.png" alt="Portada Adoptame Saladillo" class="hero-image">
     <div class="hero-text">
         <h1>Bienvenidos a Adoptame Saladillo</h1>
         <p>¡Encontrá a tu compañero perfecto, o ayudá a una mascota a encontrar su hogar!</p>
     </div>
 </div>
 
-
+<!-- Tarjetas de servicios -->
 <div class="container mb-5">
     <div class="row g-4">
-        <!-- primera fila con 3 tarjetas -->
+        <!-- Primera fila: 3 tarjetas -->
         <div class="col-md-4">
-            <div class="card h-100 card-adopcion">
+            <div class="card card-reportar">
                 <div class="card-body">
                     <i class="fas fa-paw card-icon"></i>
                     <h3 class="card-title">Mascotas en Adopción</h3>
@@ -72,7 +62,7 @@ include '../config/database.php';
             </div>
         </div>
 
-        <!-- segunda fila con 2 tarjetas centradas para que queden bien los espacios -->
+        <!-- Segunda fila: 2 tarjetas centradas -->
         <div class="col-md-6">
             <div class="card h-100 card-reportar">
                 <div class="card-body">
@@ -97,6 +87,6 @@ include '../config/database.php';
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<?php 
+include 'includes/sidebar.php';
+?>
