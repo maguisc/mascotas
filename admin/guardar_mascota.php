@@ -1,12 +1,12 @@
 <?php
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
+// Arranco la sesión si no está activa
+session_status() == PHP_SESSION_NONE && session_start();
 
+// Incluyo los archivos necesarios
 include 'auth/verificar_sesion.php';
 include '../config/database.php';
 
-// eliminación
+// Lógica para eliminar mascota
 if (isset($_POST['accion']) && $_POST['accion'] == 'eliminar') {
     header('Content-Type: application/json');
     
@@ -14,54 +14,46 @@ if (isset($_POST['accion']) && $_POST['accion'] == 'eliminar') {
     $respuesta = ['success' => false, 'message' => ''];
     
     try {
-        // inicio transacción
+        // Arranco una transacción para hacer todo junto
         $conn->begin_transaction();
         
-        // 1. primero elimino los formularios de tránsito
-        $sql_transito = "DELETE FROM formularios_transito WHERE id_mascota = ?";
-        $stmt_transito = $conn->prepare($sql_transito);
+        // 1. Borro formularios de tránsito
+        $stmt_transito = $conn->prepare("DELETE FROM formularios_transito WHERE id_mascota = ?");
         $stmt_transito->bind_param("i", $id_mascota);
         $stmt_transito->execute();
         
-        // 2. segundo elimino las publicaciones
-        $sql_pub = "DELETE FROM publicaciones WHERE id_mascota = ?";
-        $stmt_pub = $conn->prepare($sql_pub);
+        // 2. Borro publicaciones
+        $stmt_pub = $conn->prepare("DELETE FROM publicaciones WHERE id_mascota = ?");
         $stmt_pub->bind_param("i", $id_mascota);
         $stmt_pub->execute();
         
-        // 3. tercero obtengo la información de la imagen antes de eliminar la mascota
-        $sql_imagen = "SELECT imagen FROM mascotas WHERE id_mascota = ?";
-        $stmt_imagen = $conn->prepare($sql_imagen);
+        // 3. Guardo la imagen antes de borrar
+        $stmt_imagen = $conn->prepare("SELECT imagen FROM mascotas WHERE id_mascota = ?");
         $stmt_imagen->bind_param("i", $id_mascota);
         $stmt_imagen->execute();
-        $resultado = $stmt_imagen->get_result();
-        $mascota = $resultado->fetch_assoc();
+        $mascota = $stmt_imagen->get_result()->fetch_assoc();
         
-        // 4. se elimina la mascota la mascota
-        $sql_mascota = "DELETE FROM mascotas WHERE id_mascota = ?";
-        $stmt_mascota = $conn->prepare($sql_mascota);
+        // 4. Borro la mascota
+        $stmt_mascota = $conn->prepare("DELETE FROM mascotas WHERE id_mascota = ?");
         $stmt_mascota->bind_param("i", $id_mascota);
         
         if ($stmt_mascota->execute()) {
-            // confirmo la eliminacion con execute()
+            // Confirmo todos los cambios
             $conn->commit();
             
-            // eliminola imagen si es quexiste
+            // Borro la imagen del disco
             if ($mascota && $mascota['imagen']) {
                 $ruta_imagen = "../" . $mascota['imagen'];
-                if (file_exists($ruta_imagen)) {
-                    unlink($ruta_imagen);
-                }
+                file_exists($ruta_imagen) && unlink($ruta_imagen);
             }
             
-            $respuesta['success'] = true;
-            $respuesta['message'] = 'Mascota eliminada exitosamente';
+            $respuesta = ['success' => true, 'message' => 'Mascota eliminada exitosamente'];
         } else {
             throw new Exception('Error al eliminar la mascota');
         }
         
     } catch (Exception $e) {
-        // si hay algun error puedo revertir los cambios y muestro esta alerta
+        // Si algo falla, deshago todos los cambios
         $conn->rollback();
         $respuesta['message'] = 'Error al eliminar la mascota: ' . $e->getMessage();
     }
@@ -70,22 +62,25 @@ if (isset($_POST['accion']) && $_POST['accion'] == 'eliminar') {
     exit;
 }
 
-// creación y actualización
+// Lógica para crear o actualizar mascota
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre = $_POST['nombre'];
-    $tipo = $_POST['tipo'];
-    $genero = $_POST['genero'];
-    $raza = $_POST['raza'];
-    $tamano = $_POST['tamano'];
-    $edad = $_POST['edad'];
-    $castrado = $_POST['castrado'];
-    $vacunado = $_POST['vacunado'];
-    $estado = $_POST['estado'];
+    // Obtengo todos los datos del formulario
+    $datos = [
+        'nombre' => $_POST['nombre'],
+        'tipo' => $_POST['tipo'],
+        'genero' => $_POST['genero'],
+        'raza' => $_POST['raza'],
+        'tamano' => $_POST['tamano'],
+        'edad' => $_POST['edad'],
+        'castrado' => $_POST['castrado'],
+        'vacunado' => $_POST['vacunado'],
+        'estado' => $_POST['estado']
+    ];
     
-    // se verifica que es una actualizacion
+    // Verifico si es actualización o creación
     $id_mascota = isset($_POST['id_mascota']) ? $_POST['id_mascota'] : null;
     
-    // aca esta el manejo de la imagen
+    // Manejo de la imagen
     $imagen = "";
     if(isset($_FILES['imagen']) && $_FILES['imagen']['size'] > 0) {
         $extension = pathinfo($_FILES["imagen"]["name"], PATHINFO_EXTENSION);
@@ -101,48 +96,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
     
+    // Preparo la consulta SQL según sea actualización o creación
     if ($id_mascota) {
-        // actualizacion
-        if ($imagen != "") {
-            // si hay una nueva imagen se actualizan todos los datos
+        // Actualización
+        if ($imagen) {
+            // Con nueva imagen
             $sql = "UPDATE mascotas SET 
-                    nombre = ?, 
-                    tipo = ?, 
-                    genero = ?, 
-                    raza = ?, 
-                    tamano = ?, 
-                    edad = ?, 
-                    castrado = ?, 
-                    vacunado = ?, 
-                    estado = ?,
-                    imagen = ?
-                    WHERE id_mascota = ?";
+                    nombre = ?, tipo = ?, genero = ?, raza = ?, 
+                    tamano = ?, edad = ?, castrado = ?, vacunado = ?, 
+                    estado = ?, imagen = ? WHERE id_mascota = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssssssssi", $nombre, $tipo, $genero, $raza, $tamano, $edad, $castrado, $vacunado, $estado, $imagen, $id_mascota);
+            $stmt->bind_param(
+                "ssssssssssi", 
+                $datos['nombre'], $datos['tipo'], $datos['genero'], $datos['raza'],
+                $datos['tamano'], $datos['edad'], $datos['castrado'], $datos['vacunado'],
+                $datos['estado'], $imagen, $id_mascota
+            );
         } else {
-            // si no hay una imagen nueva actualizo todo menos la imagen
+            // Sin nueva imagen
             $sql = "UPDATE mascotas SET 
-                    nombre = ?, 
-                    tipo = ?, 
-                    genero = ?, 
-                    raza = ?, 
-                    tamano = ?, 
-                    edad = ?, 
-                    castrado = ?, 
-                    vacunado = ?, 
-                    estado = ?
-                    WHERE id_mascota = ?";
+                    nombre = ?, tipo = ?, genero = ?, raza = ?, 
+                    tamano = ?, edad = ?, castrado = ?, vacunado = ?, 
+                    estado = ? WHERE id_mascota = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssssssssi", $nombre, $tipo, $genero, $raza, $tamano, $edad, $castrado, $vacunado, $estado, $id_mascota);
+            $stmt->bind_param(
+                "sssssssssi", 
+                $datos['nombre'], $datos['tipo'], $datos['genero'], $datos['raza'],
+                $datos['tamano'], $datos['edad'], $datos['castrado'], $datos['vacunado'],
+                $datos['estado'], $id_mascota
+            );
         }
     } else {
-        // nueva
+        // Creación nueva
         $sql = "INSERT INTO mascotas (nombre, tipo, genero, raza, tamano, edad, castrado, vacunado, imagen, estado) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssssss", $nombre, $tipo, $genero, $raza, $tamano, $edad, $castrado, $vacunado, $imagen, $estado);
+        $stmt->bind_param(
+            "ssssssssss", 
+            $datos['nombre'], $datos['tipo'], $datos['genero'], $datos['raza'],
+            $datos['tamano'], $datos['edad'], $datos['castrado'], $datos['vacunado'],
+            $imagen, $datos['estado']
+        );
     }
     
+    // Ejecuto la consulta y redirijo o muestro error
     if ($stmt->execute()) {
         header("Location: index.php");
     } else {

@@ -1,40 +1,40 @@
 <?php
+// Subir imagen
 include '../../config/database.php';
-include '../auth/verificar_sesion.php';
 
 header('Content-Type: application/json');
 
+// Verificar datos
 if (!isset($_FILES['image']) || !isset($_POST['chat_id'])) {
-    echo json_encode(['success' => false, 'error' => 'No se proporcionó imagen o ID de chat']);
+    echo json_encode(['success' => false]);
     exit;
 }
 
 $chat_id = $_POST['chat_id'];
 $file = $_FILES['image'];
-$allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
 
-if (!in_array($file['type'], $allowed_types)) {
-    echo json_encode(['success' => false, 'error' => 'Tipo de archivo no permitido']);
+// Verificar tipo
+$tipos_permitidos = ['image/jpeg', 'image/png', 'image/gif'];
+if (!in_array($file['type'], $tipos_permitidos)) {
+    echo json_encode(['success' => false]);
     exit;
 }
 
-$upload_dir = '../../uploads/chat/';
-if (!file_exists($upload_dir)) {
-    mkdir($upload_dir, 0777, true);
+// Guardar archivo
+$directorio = '../../uploads/chat/';
+if (!file_exists($directorio)) {
+    mkdir($directorio, 0777, true);
 }
 
-$filename = uniqid() . '_' . basename($file['name']);
-$upload_path = $upload_dir . $filename;
+$nombre_archivo = uniqid() . '_' . $file['name'];
+$ruta_completa = $directorio . $nombre_archivo;
 
-if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-    $relative_path = 'uploads/chat/' . $filename;
+if (move_uploaded_file($file['tmp_name'], $ruta_completa)) {
     echo json_encode([
         'success' => true,
-        'url' => $relative_path
+        'url' => 'uploads/chat/' . $nombre_archivo
     ]);
 } else {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Error al subir la imagen'
-    ]);
+    echo json_encode(['success' => false]);
 }
+?>

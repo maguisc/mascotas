@@ -1,212 +1,216 @@
 <?php
-include '../../config/database.php';
-include '../includes/header.php';
-include '../includes/sidebar.php';
-include '../auth/verificar_sesion.php';
+session_start();
+include_once '../includes/sidebar.php';
+include_once(__DIR__ . '/../../config/database.php');
 
-$query = "SELECT 
-            c.id_chat,
-            u.nombre as nombre_usuario,
-            u.email as email_usuario,
-            m.mensaje as ultimo_mensaje,
-            m.fecha_envio as fecha_ultimo_mensaje
-            FROM (
-                SELECT MAX(id_chat) as id_chat, id_usuario
-                FROM chats
-                GROUP BY id_usuario
-            ) as ultimos_chats
-            JOIN chats c ON c.id_chat = ultimos_chats.id_chat
-            JOIN usuarios u ON c.id_usuario = u.id_usuario
-            LEFT JOIN mensajes m ON m.id_chat = c.id_chat
-            AND m.id_mensaje = (
-                SELECT id_mensaje 
-                FROM mensajes 
-                WHERE id_chat = c.id_chat 
-                ORDER BY fecha_envio DESC 
-                LIMIT 1
-            )
-            ORDER BY m.fecha_envio DESC";
-
-$result = $conn->query($query);
+// Consulta para agrupar por email_usuario
+$consulta = $conn->query("SELECT email_usuario, nombre_usuario, MAX(id_chat) as id_chat, 
+                          MAX(fecha_actualizacion) as fecha_actualizacion, ultimo_mensaje 
+                          FROM chats 
+                          GROUP BY email_usuario 
+                          ORDER BY fecha_actualizacion DESC");
+$chats = $consulta->fetch_all(MYSQLI_ASSOC);
 ?>
 
-<div class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Esta es la lista de Chats -->
-            <div class="col-md-4 chat-list">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Chats Activos</h5>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        <?php if($result && $result->num_rows > 0): ?>
-                            <?php while($chat = $result->fetch_assoc()): ?>
-                                <a href="#" class="list-group-item list-group-item-action chat-item" 
-                                    onclick="loadChat(<?php echo $chat['id_chat']; ?>)"
-                                    data-chat-id="<?php echo $chat['id_chat']; ?>">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div>
-                                            <h6 class="mb-1"><?php echo htmlspecialchars($chat['nombre_usuario']); ?></h6>
-                                            <small class="text-muted"><?php echo htmlspecialchars($chat['email_usuario']); ?></small>
-                                            <?php if($chat['ultimo_mensaje']): ?>
-                                                <p class="mb-1 text-truncate">
-                                                    <?php echo htmlspecialchars($chat['ultimo_mensaje']); ?>
-                                                </p>
-                                            <?php endif; ?>
-                                        </div>
-                                        <?php if($chat['fecha_ultimo_mensaje']): ?>
-                                            <small class="text-muted">
-                                                <?php echo date('H:i', strtotime($chat['fecha_ultimo_mensaje'])); ?>
-                                            </small>
-                                        <?php endif; ?>
-                                    </div>
-                                </a>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <div class="list-group-item text-center text-muted">
-                                No hay chats activos
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chat Activo -->
-            <div class="col-md-8">
-                <div class="card chat-window">
-                    <div class="card-header" id="chat-header">
-                        <h5 class="card-title mb-0">Chat</h5>
-                    </div>
-                    <div class="card-body chat-messages" id="chat-messages">
-                        <!-- Los mensajes se van a cargar en esta parte -->
-                    </div>
-                    <div class="card-footer">
-                    <form id="chat-form" class="d-none">
-    <div class="input-group">
-        <input type="text" class="form-control" id="message-input" 
-            placeholder="Escribe un mensaje...">
-        <input type="file" id="image-input" accept="image/*" style="display: none;">
-        <button type="button" class="btn btn-light" onclick="document.getElementById('image-input').click()">
-            <i class="fas fa-image"></i>
-        </button>
-        <button type="submit" class="btn btn-primary">Enviar</button>
-    </div>
-</form>
-                    </div>
-                </div>
-            </div>
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-md-3"></div>
+    
+    <!-- Lista de chats -->
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-header">
+          <h4>Chats Activos</h4>
         </div>
+        <div class="card-body p-0">
+          <div style="max-height: 500px; overflow-y: auto;">
+            <ul class="list-group" id="lista-chats">
+              <?php foreach ($chats as $chat): ?>
+              <li class="list-group-item chat-item" data-id="<?= $chat['id_chat'] ?>" data-email="<?= $chat['email_usuario'] ?>">
+                <b><?= $chat['nombre_usuario'] ?></b><br>
+                <small><?= $chat['email_usuario'] ?></small>
+                <?php if (!empty($chat['ultimo_mensaje'])): ?>
+                <p class="mb-0"><small><?= $chat['ultimo_mensaje'] ?></small></p>
+                <?php endif; ?>
+              </li>
+              <?php endforeach; ?>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Panel del chat -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h4>Chat</h4>
+        </div>
+        <div class="card-body">
+          <div id="chat-box" style="height: 400px; overflow-y: auto; background-color: white; padding: 10px;"></div>
+          
+          <!-- Formulario -->
+          <form id="chat-form" class="mt-3">
+            <input type="hidden" name="id_chat" id="chat-id">
+            <input type="hidden" name="email_usuario" id="email-usuario">
+            <input type="hidden" name="imagen_url" id="imagen-url" value="">
+            
+            <div class="input-group mb-2">
+              <input type="text" class="form-control" id="message-input" name="mensaje" placeholder="Escribe un mensaje...">
+              <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
+            
+            <div>
+              <button type="button" id="image-button" class="btn btn-secondary btn-sm">Adjuntar imagen</button>
+              <input type="file" id="image-upload" style="display: none;" accept="image/jpeg,image/png,image/gif">
+              <div id="image-preview" class="d-none mt-2">
+                <img src="" style="max-height: 40px;">
+                <button type="button" id="remove-image" class="btn btn-sm btn-danger">X</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
 <script>
-let currentChatId = null;
-const socket = io('http://localhost:3000', {
-    transports: ['websocket']
-});
+// Variables globales
+const INTERVALO_ACTUALIZACION = 5000; // 5 segundos
 
-socket.on('connect', () => {
-    console.log('Conectado al servidor de chat');
-});
-
-socket.on('receive_message', (data) => {
-    if(data.chatId == currentChatId) {
-        appendMessage(data);
-    }
-});
-
-function loadChat(chatId) {
-    currentChatId = chatId;
-    document.getElementById('chat-form').classList.remove('d-none');
-    
-    // Marcar chat como activo
-    document.querySelectorAll('.chat-item').forEach(item => {
-        item.classList.remove('active');
+// Funciones principales
+function cargarMensajes(chatId, email, desplazarAbajo = true) {
+  fetch('cargar_mensajes.php?email=' + email)
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('chat-box').innerHTML = data;
+      if (desplazarAbajo) {
+        document.getElementById('chat-box').scrollTop = 99999;
+      }
     });
-    document.querySelector(`.chat-item[data-chat-id="${chatId}"]`).classList.add('active');
-    
-    socket.emit('join_chat', chatId);
-
-    // Limpiar y mostrar carga
-    const messagesContainer = document.getElementById('chat-messages');
-    messagesContainer.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
-
-    // Cargar mensajes
-    fetch(`cargar_mensajes.php?id_chat=${chatId}`)
-        .then(response => response.json())
-        .then(data => {
-            messagesContainer.innerHTML = '';
-            if (Array.isArray(data)) {
-                data.forEach(message => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `chat-message ${message.tipo_emisor === 'admin' ? 'sent' : 'received'}`;
-                    
-                    let content = `<div class="message-content">`;
-                    // Si hay imagen se muestra
-                    if (message.imagen_url) {
-                        content += `<img src="../../${message.imagen_url}" class="message-image" alt="Imagen">`;
-                    }
-                    // Mostrar mensaje si existe y no es imagen enviada
-                    if (message.mensaje && message.mensaje !== 'Imagen enviada') {
-                        content += `<p>${message.mensaje}</p>`;
-                    }
-                    content += '</div>';
-                    
-                    messageDiv.innerHTML = content;
-                    messagesContainer.appendChild(messageDiv);
-                });
-            }
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            messagesContainer.innerHTML = '<div class="alert alert-danger">Error al cargar mensajes</div>';
-        });
 }
 
-function appendMessage(message) {
-    const messagesContainer = document.getElementById('chat-messages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `chat-message ${message.tipo_emisor === 'admin' ? 'sent' : 'received'}`;
-    
-    let content = `<div class="message-content">`;
-    // Si hay imagen se muestra
-    if (message.imagen_url) {
-        content += `<img src="../../${message.imagen_url}" class="message-image" alt="Imagen">`;
-    }
-    // Mostrar mensaje si existe y no es imagen enviada
-    if ((message.message || message.mensaje) && message.message !== 'Imagen enviada') {
-        content += `<p>${message.message || message.mensaje}</p>`;
-    }
-    content += '</div>';
-    
-    messageDiv.innerHTML = content;
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+function enviarMensaje() {
+  const mensaje = document.getElementById('message-input').value.trim();
+  const imagenUrl = document.getElementById('imagen-url').value;
+  const chatId = document.getElementById('chat-id').value;
+  const email = document.getElementById('email-usuario').value;
+  
+  if ((!mensaje && !imagenUrl) || !chatId || !email) return;
+  
+  const formData = new FormData();
+  formData.append('id_chat', chatId);
+  formData.append('email_usuario', email);
+  formData.append('mensaje', mensaje);
+  formData.append('imagen_url', imagenUrl);
+  
+  const boton = document.querySelector('#chat-form button[type="submit"]');
+  boton.disabled = true;
+  
+  fetch('guardar_mensaje.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(() => {
+    document.getElementById('message-input').value = '';
+    document.getElementById('imagen-url').value = '';
+    document.getElementById('image-preview').classList.add('d-none');
+    document.getElementById('image-upload').value = '';
+    cargarMensajes(chatId, email);
+    boton.disabled = false;
+  })
+  .catch(() => {
+    boton.disabled = false;
+  });
 }
 
-document.getElementById('chat-form').addEventListener('submit', function(e) {
+function subirImagen(archivo) {
+  const chatId = document.getElementById('chat-id').value;
+  if (!chatId) return;
+  
+  // Vista previa
+  const lector = new FileReader();
+  lector.onload = function(e) {
+    document.querySelector('#image-preview img').src = e.target.result;
+    document.getElementById('image-preview').classList.remove('d-none');
+  };
+  lector.readAsDataURL(archivo);
+  
+  // Subir al servidor
+  const formData = new FormData();
+  formData.append('image', archivo);
+  formData.append('chat_id', chatId);
+  
+  fetch('subir_imagen.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('imagen-url').value = data.url;
+      document.getElementById('message-input').value = '[Imagen]';
+    } else {
+      document.getElementById('image-upload').value = '';
+      document.getElementById('image-preview').classList.add('d-none');
+      alert('Error al subir la imagen');
+    }
+  });
+}
+
+// Inicialización y eventos
+document.addEventListener('DOMContentLoaded', function() {
+  // Seleccionar primer chat
+  const elementosChat = document.querySelectorAll('.chat-item');
+  if (elementosChat.length > 0) {
+    elementosChat[0].classList.add('active');
+    document.getElementById('chat-id').value = elementosChat[0].getAttribute('data-id');
+    document.getElementById('email-usuario').value = elementosChat[0].getAttribute('data-email');
+    cargarMensajes(elementosChat[0].getAttribute('data-id'), elementosChat[0].getAttribute('data-email'));
+  }
+  
+  // Eventos de click en chats
+  document.querySelectorAll('.chat-item').forEach(item => {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.chat-item').forEach(c => c.classList.remove('active'));
+      item.classList.add('active');
+      
+      const chatId = item.getAttribute('data-id');
+      const email = item.getAttribute('data-email');
+      document.getElementById('chat-id').value = chatId;
+      document.getElementById('email-usuario').value = email;
+      cargarMensajes(chatId, email);
+    });
+  });
+
+  // Envío de mensajes
+  document.getElementById('chat-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const input = document.getElementById('message-input');
-    const message = input.value.trim();
-    
-    if(message && currentChatId) {
-        // Solamente mando el mensaje a través del socket
-        socket.emit('send_message', {
-            chatId: currentChatId,
-            userId: <?php echo $_SESSION['admin_id']; ?>,
-            message: message,
-            tipo_emisor: 'admin',
-            userName: '<?php echo $_SESSION['admin_nombre']; ?>',
-            userEmail: '<?php echo $_SESSION['admin_email']; ?>'
-        });
-        
-        
-        input.value = '';
-    }
+    enviarMensaje();
+  });
+  
+  // Manejo de imágenes
+  document.getElementById('image-button').addEventListener('click', function() {
+    document.getElementById('image-upload').click();
+  });
+  
+  document.getElementById('image-upload').addEventListener('change', function(e) {
+    if (e.target.files[0]) subirImagen(e.target.files[0]);
+  });
+  
+  document.getElementById('remove-image').addEventListener('click', function() {
+    document.getElementById('image-upload').value = '';
+    document.getElementById('imagen-url').value = '';
+    document.getElementById('message-input').value = '';
+    document.getElementById('image-preview').classList.add('d-none');
+  });
+  
+  // Actualización automática
+  setInterval(function() {
+    const chatId = document.getElementById('chat-id').value;
+    const email = document.getElementById('email-usuario').value;
+    if (chatId && email) cargarMensajes(chatId, email, false);
+  }, INTERVALO_ACTUALIZACION);
 });
 </script>
-</body>
-</html>

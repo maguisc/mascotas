@@ -1,46 +1,71 @@
 <?php
+// Cargar mensajes del chat
 include '../../config/database.php';
-include '../auth/verificar_sesion.php';
 
-header('Content-Type: application/json');
-
-if (!isset($_GET['id_chat'])) {
-    echo json_encode(['error' => 'ID de chat no proporcionado']);
-    exit;
+$email = $_GET['email'] ?? '';
+if (empty($email)) {
+  echo '<div class="text-center">Selecciona un chat</div>';
+  exit;
 }
 
-$id_chat = $_GET['id_chat'];
+// Consultar ID de chats de este usuario
+$sql_chats = "SELECT id_chat FROM chats WHERE email_usuario = ?";
+$stmt_chats = $conn->prepare($sql_chats);
+$stmt_chats->bind_param("s", $email);
+$stmt_chats->execute();
+$result_chats = $stmt_chats->get_result();
 
-// Acá consulta todos los mensajes del chat ordenados por id_mensaje
-$query = "SELECT 
-            m.*,
-            COALESCE(u.nombre, a.nombre) as nombre_emisor,
-            COALESCE(u.email, a.email) as email_emisor
-          FROM mensajes m
-          LEFT JOIN usuarios u ON m.id_emisor = u.id_usuario AND m.tipo_emisor = 'usuario'
-          LEFT JOIN administrador a ON m.id_emisor = a.id_admin AND m.tipo_emisor = 'admin'
-          WHERE m.id_chat = ?
-          ORDER BY m.id_mensaje ASC";
+if ($result_chats->num_rows === 0) {
+  echo '<div class="text-center">No hay mensajes</div>';
+  exit;
+}
 
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $id_chat);
+// Obtener todos los IDs de chat
+$ids_chat = [];
+while ($row_chat = $result_chats->fetch_assoc()) {
+  $ids_chat[] = $row_chat['id_chat'];
+}
+
+// Consultar mensajes de todos los chats del usuario
+$ids_placeholders = str_repeat('?,', count($ids_chat) - 1) . '?';
+$sql = "SELECT * FROM mensajes WHERE id_chat IN ($ids_placeholders) ORDER BY fecha_envio ASC";
+$stmt = $conn->prepare($sql);
+
+// Binding dinámico de parámetros
+$types = str_repeat('i', count($ids_chat));
+$stmt->bind_param($types, ...$ids_chat);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$mensajes = [];
-while ($row = $result->fetch_assoc()) {
-    $mensajes[] = [
-        'id' => $row['id_mensaje'],
-        'mensaje' => $row['mensaje'],
-        'tipo_emisor' => $row['tipo_emisor'],
-        'nombre_emisor' => $row['nombre_emisor'],
-        'email_emisor' => $row['email_emisor'],
-        'imagen_url' => $row['imagen_url'],
-        'timestamp' => strtotime($row['fecha_envio']) * 1000
-    ];
+if ($result->num_rows === 0) {
+  echo '<div class="text-center">No hay mensajes</div>';
+  exit;
 }
 
-echo json_encode($mensajes);
-$stmt->close();
-$conn->close();
+// Mostrar mensajes
+while ($row = $result->fetch_assoc()) {
+  $es_admin = ($row['tipo_emisor'] === 'admin');
+  
+  // Clase según el tipo de mensaje
+  $clase_div = $es_admin ? 'mensaje-admin' : 'mensaje-usuario';
+  $clase_burbuja = $es_admin ? 'burbuja-admin' : 'burbuja-usuario';
+  
+  echo '<div class="' . $clase_div . '">';
+  echo '<div class="' . $clase_burbuja . '">';
+  
+  // Imagen o texto
+  if (!empty($row['imagen_url'])) {
+    $img_ruta = '../../' . $row['imagen_url'];
+    echo '<img src="' . $img_ruta . '" class="imagen-mensaje" onclick="window.open(\'' . $img_ruta . '\', \'_blank\')">';
+  } else {
+    echo htmlspecialchars($row['mensaje']);
+  }
+  
+  // Hora
+  $hora = date('H:i', strtotime($row['fecha_envio']));
+  echo '<div class="hora-mensaje">' . $hora . '</div>';
+  
+  echo '</div>'; // fin burbuja
+  echo '</div>'; // fin mensaje
+}
 ?>

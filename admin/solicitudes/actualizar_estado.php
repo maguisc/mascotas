@@ -2,6 +2,7 @@
 include '../../config/database.php';
 include '../auth/verificar_sesion.php';
 
+// Configuro respuesta JSON
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -9,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id_formulario = $_POST['id'];
     $nuevo_estado = $_POST['estado'];
     
-    // Determinar la tabla y estados válidos según el tipo de formulario
+    // Determino la tabla según el tipo
     $tabla = match($tipo) {
         'Adopción' => 'formularios_adopcion',
         'Tránsito' => 'formularios_transito',
@@ -17,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         default => ''
     };
 
-    // Verificar que se haya encontrado una tabla válida
+    // Me fijo que la tabla sea válida
     if ($tabla === '') {
         echo json_encode([
             'success' => false,
@@ -26,14 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    // Definir estados válidos según el tipo
-    if ($tipo == 'Contacto') {
-        $estados_validos = ['Pendiente', 'Respondido', 'Cerrado'];
-    } else {
-        $estados_validos = ['Pendiente', 'Aprobado', 'Rechazado'];
-    }
+    // Defino estados válidos según el tipo
+    $estados_validos = $tipo == 'Contacto' 
+        ? ['Pendiente', 'Respondido', 'Cerrado'] 
+        : ['Pendiente', 'Aprobado', 'Rechazado'];
 
-    // Validar que el estado sea válido
+    // Valido que el estado sea correcto
     if (!in_array($nuevo_estado, $estados_validos)) {
         echo json_encode([
             'success' => false,
@@ -42,26 +41,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
     
-    // Determinar el campo ID según el tipo
+    // Determino el campo ID
     $campo_id = $tipo == 'Contacto' ? 'id_contacto' : 'id_formulario';
     
-    // Actualizar el estado
-    $sql = "UPDATE " . $tabla . " SET estado = ? WHERE " . $campo_id . " = ?";
+    // Actualizo el estado
+    $sql = "UPDATE $tabla SET estado = ? WHERE $campo_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("si", $nuevo_estado, $id_formulario);
     
-    if ($stmt->execute()) {
-        $stmt->close();
-        $conn->close();
-        echo json_encode(['success' => true]);
-    } else {
-        $stmt->close();
-        $conn->close();
-        echo json_encode([
-            'success' => false,
-            'message' => 'Error al actualizar el estado'
-        ]);
-    }
+    // Ejecuto y respondo
+    echo json_encode([
+        'success' => $stmt->execute(),
+        'message' => $stmt->execute() ? '' : 'Error al actualizar el estado'
+    ]);
+    
+    $stmt->close();
+    $conn->close();
+    
 } else {
     echo json_encode([
         'success' => false,

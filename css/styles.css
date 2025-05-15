@@ -1,10 +1,46 @@
+/* ====================================================
+   TABLA DE CONTENIDOS
+   ====================================================
+   1. GENERAL
+   2. ESTRUCTURA BÁSICA
+   3. NAVEGACIÓN Y SIDEBAR
+   4. COMPONENTES BÁSICOS
+      4.1 Botones
+      4.2 Tarjetas
+      4.3 Tablas
+      4.4 Formularios
+      4.5 Secciones Principales
+      4.6 Chat
+   5. PÁGINAS ESPECÍFICAS
+      5.1 Mascotas
+      5.2 Donaciones
+      5.3 Login
+   6. FOOTER
+   7. AJUSTES PARA MÓVIL
+   ==================================================== */
+
+/* ====================================================
+   1. GENERAL
+   ==================================================== */
 body {
-    background-color: #f5f7fa;
-    min-height: 100vh;
-    position: relative;
+    background-color: #fff1e6;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
 }
 
-/* overlay para la visualizacion movil */
+/* ====================================================
+   2. ESTRUCTURA BÁSICA
+   ==================================================== */
+.container {
+    padding: 20px 0;
+}
+
+.content {
+    margin-left: 250px;
+    padding: 20px;
+}
+
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -12,7 +48,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: #00000080;
     z-index: 1020;
 }
 
@@ -20,185 +56,45 @@ body {
     display: block;
 }
 
-/* sección Hero */
-.hero-section {
-    position: relative;
-    height: 500px;
-    margin-bottom: 50px;
+/* ====================================================
+   3. NAVEGACIÓN Y SIDEBAR
+   ==================================================== */
+/* Navbar */
+nav {
+    background-color: #fff7f0;
+    padding: 10px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
 }
 
-.hero-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.hero-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-    width: 100%;
-    padding: 20px;
-}
-
-.hero-text h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-}
-
-.hero-text p {
-    font-size: 1.5rem;
-    margin: 0;
-}
-
-/* aca estan todas las tarjetas */
-.card {
-    height: 100%;
-    border: none;
-    border-radius: 15px;
-    background: #ffffff;
-    border-top: 5px solid transparent;
-    padding: 20px;
-}
-
-/* colores de las tarjetas */
-.card-adopcion { border-top-color: #4CAF50; }
-.card-transito { border-top-color: #2196F3; }
-.card-perdidas { border-top-color: #F44336; }
-.card-reportar { border-top-color: #FF9800; }
-.card-donacion { border-top-color: #9C27B0; }
-
-/* contenido de las tarjetas */
-.card-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: #666;
-}
-
-.card-title {
-    color: #1B4965;
-    font-weight: bold;
-    margin-bottom: 15px;
-    font-size: 1.5rem;
-}
-
-.card-text {
-    color: #666;
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-}
-
-.card-body {
-    padding: 1rem;
-    text-align: center;
-}
-
-/* aca estan todos los botones */
-.btn-adoptar {
-    background-color: #5BC0BE;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 25px;
+nav a {
+    color: #6a4e42;
     font-weight: 500;
-    transition: background-color 0.2s ease;
+    text-decoration: none;
+    margin: 0 10px;
+    padding: 6px 12px;
 }
 
-.btn-adoptar:hover {
-    background-color: #4CA5A3;
-    color: white;
+nav a:hover {
+    background-color: #e76f5120;
+    color: #e76f51;
 }
 
-/* aca estan todas las tablas */
-.table td {
-    vertical-align: middle;
+nav ul,
+nav .navbar-nav {
+    display: flex;
+    justify-content: center;
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-.table-solicitudes {
-    background-color: white;
-    border-radius: 8px;
-}
-
-.table-solicitudes th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    padding: 12px;
-}
-
-.table-solicitudes td {
-    padding: 12px;
-}
-
-/* chat */
-.chat-messages {
-    height: 60vh;
-    overflow-y: auto;
-    padding: 15px;
-    background-color: #fff;
-}
-
-.chat-message {
-    margin-bottom: 15px;
-    max-width: 70%;
-}
-
-.chat-message.sent {
-    margin-left: auto;
-}
-
-.chat-message.received {
-    margin-right: auto;
-}
-
-.message-content {
-    padding: 10px;
-    border-radius: 10px;
-    background-color: #f8f9fa;
-}
-
-.chat-message.sent .message-content {
-    background-color: #007bff;
-    color: white;
-}
-
-.message-image {
-    max-width: 200px;
-    max-height: 200px;
-    border-radius: 5px;
-    margin-bottom: 5px;
-}
-
-/* layout */
-.container {
-    padding: 2rem 0;
-}
-
-/* mascotas */
-.mascota-card {
-    border-radius: 10px;
-    background: white;
-    margin-bottom: 20px;
-}
-
-.mascota-imagen {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-}
-
-.mascota-info {
-    padding: 15px;
-    background-color: #f8f9fa;
-}
-
-/* sidebar y navegación responsive */
+/* Sidebar */
 .sidebar {
-    height: 100vh;
+    height: 100%;
     width: 250px;
     position: fixed;
     top: 0;
@@ -206,9 +102,7 @@ body {
     background-color: white;
     padding: 20px;
     border-right: 1px solid #dee2e6;
-    transition: transform 0.3s ease;
     z-index: 1030;
-    overflow-y: auto;
 }
 
 .sidebar-header {
@@ -228,7 +122,7 @@ body {
     background: none;
     border: none;
     color: #666;
-    font-size: 1.2rem;
+    font-size: 18px;
     padding: 5px;
 }
 
@@ -238,26 +132,15 @@ body {
     top: 15px;
     left: 15px;
     z-index: 1040;
-    background-color: #5BC0BE;
+    background-color: #e76f51;
     color: white;
     border: none;
     padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.content {
-    margin-left: 250px;
-    padding: 20px;
-    min-height: 100vh;
-}
-
-/* navegación */
 .nav-link {
     color: #495057;
     padding: 10px 15px;
-    border-radius: 5px;
-    transition: all 0.2s ease;
     display: flex;
     align-items: center;
 }
@@ -274,24 +157,64 @@ body {
     margin-right: 10px;
 }
 
-/* botones adicionales */
+/* ====================================================
+   4. COMPONENTES BÁSICOS
+   ==================================================== */
+
+/* 4.1 Botones */
+
+.btn-registrate {
+    border: 2px solid #f28c38;
+    border-radius: 10px
+}
+
+.btn-registrate:hover {
+    background-color: #f6886c;
+}
+.btn-adoptar {
+    background-color: #e76f51;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    font-weight: 500;
+    border-radius: 25px;
+}
+
+.btn-adoptar:hover {
+    background-color: #d45d3c;
+    color: white;
+}
+
+.btn-donar {
+    background-color: #e76f51;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    font-weight: 500;
+    display: inline-block;
+    border-radius: 25px;
+}
+
+.btn-donar:hover {
+    background-color: #d45d3c;
+    color: white;
+}
+
 .btn-nueva,
 .btn-publicar {
-    background-color: #5BC0BE;
+    background-color: #e76f51;
     color: white;
-    transition: background-color 0.2s ease;
 }
 
 .btn-nueva:hover,
 .btn-publicar:hover {
-    background-color: #4CA5A3;
+    background-color: #d45d3c;
     color: white;
 }
 
 .btn-editar {
     background-color: #6C757D;
     color: white;
-    transition: background-color 0.2s ease;
 }
 
 .btn-editar:hover {
@@ -302,7 +225,6 @@ body {
 .btn-eliminar {
     background-color: #DC3545;
     color: white;
-    transition: background-color 0.2s ease;
 }
 
 .btn-eliminar:hover {
@@ -310,19 +232,324 @@ body {
     color: white;
 }
 
-/* modal */
-.modal-content {
+.btn-login {
+    background-color: #e76f51;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    font-weight: 500;
+    width: 100%;
+    border-radius: 25px;
+}
+
+.btn-login:hover {
+    background-color: #e08c4c;
+}
+
+/* 4.2 Tarjetas */
+.card {
+    border: none;
+    background: #fff7f0;
+    border-top: 5px solid transparent;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.card-body {
+    padding: 15px;
+    text-align: center;
+}
+
+.card-icon {
+    font-size: 30px;
+    margin-bottom: 15px;
+    color: #666;
+}
+
+.card-text {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Colores de las tarjetas */
+.card-transito {
+    border-top-color: #f7b267;
+}
+
+.card-perdidas {
+    border-top-color: #ee6c4d;
+}
+
+.card-reportar {
+    border-top-color: #f4a261;
+}
+
+.card-donacion {
+    border-top-color: #b56576;
+}
+
+.card-donacion-personalizada {
+    background-color: #fff7f0;
+    border-top: 5px solid #e76f51;
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card-donacion-personalizada h3 {
+    color: #e76f51;
+}
+
+.card-donacion-personalizada .icon-container i {
+    font-size: 30px;
+    color: #e76f51;
+}
+
+/* 4.3 Tablas */
+.table td {
+    vertical-align: middle;
+}
+
+.table-solicitudes {
+    background-color: white;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.table-solicitudes th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.table-solicitudes td {
+    padding: 12px;
+}
+
+/* 4.4 Formularios */
+input.form-control {
+    border: 2px solid #f28c38;
+    padding: 10px 15px;
+    font-size: 16px;
     border-radius: 10px;
 }
 
-.modal-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+input.form-control:focus {
+    border-color: #e76f51;
+    box-shadow: 0 0 0 0.15rem rgba(231, 111, 81, 0.25);
 }
 
-/* estilos para detalle_mascota.php */
+.requirements-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.requirements-list li {
+    padding: 3px 0;
+}
+
+.requirements-list li::before {
+    content: '❌';
+    margin-right: 5px;
+}
+
+.requirements-list li.valid::before {
+    content: '✅';
+}
+
+.invalid {
+    color: #dc3545;
+}
+
+.valid {
+    color: #198754;
+}
+
+/* 4.5 Secciones Principales */
+.hero-section {
+    position: relative;
+    height: 500px;
+    margin-bottom: 50px;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    width: 80%;
+    padding: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.hero-text h1 {
+    font-size: 36px;
+    margin-bottom: 16px;
+}
+
+.hero-text p {
+    font-size: 24px;
+    margin: 0;
+}
+
+/* 4.6 Chat */
+.chat-item {
+    cursor: pointer;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+  
+.chat-item:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+  
+.chat-item.active {
+    background-color: #f0f0f0;
+    border-left: 3px solid #007bff;
+    color: #333;
+}
+  
+.mensaje-admin {
+    text-align: right;
+    margin-bottom: 10px;
+}
+  
+.mensaje-usuario {
+    text-align: left;
+    margin-bottom: 10px;
+}
+  
+.burbuja-admin {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 8px 12px;
+    max-width: 75%;
+    border-radius: 12px 12px 0 12px;
+}
+  
+.burbuja-usuario {
+    display: inline-block;
+    background-color: #e9ecef;
+    color: #333;
+    padding: 8px 12px;
+    max-width: 75%;
+    border-radius: 12px 12px 12px 0;
+}
+  
+.hora-mensaje {
+    font-size: 11px;
+    color: #777777;
+    text-align: right;
+}
+  
+.imagen-mensaje {
+    max-width: 200px;
+    max-height: 150px;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.chat-messages {
+    height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.mensaje-propio {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.mensaje-otro {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.burbuja-propio {
+  background-color: #dcf8c6;
+  border-radius: 10px;
+  padding: 8px 12px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.burbuja-otro {
+  background-color: #f1f0f0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.hora-mensaje {
+  font-size: 11px;
+  color: #888;
+  text-align: right;
+  margin-top: 3px;
+}
+
+.imagen-mensaje {
+  max-width: 100%;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.chat-item {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.chat-item:hover, .chat-item.active {
+  background-color: #f5f5f5;
+}
+
+/* ====================================================
+   5. PÁGINAS ESPECÍFICAS
+   ==================================================== */
+
+/* 5.1 Mascotas */
+.mascota-card {
+    border-radius: 10px;
+    background: white;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.mascota-imagen {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.mascota-info {
+    padding: 15px;
+    background-color: #f8f9fa;
+}
+
 .detalle-mascota-container {
-    min-height: 600px;
     margin-top: 20px;
 }
 
@@ -335,6 +562,7 @@ body {
 
 .detalle-mascota-card {
     height: 600px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .detalle-mascota-card .card-header {
@@ -359,8 +587,8 @@ body {
 }
 
 .detalle-mascota-card .btn-primary {
-    background-color: #5BC0BE;
-    border-color: #5BC0BE;
+    background-color: #e76f51;
+    border-color: #e76f51;
     padding: 12px;
     font-weight: 500;
     width: 100%;
@@ -368,24 +596,265 @@ body {
 }
 
 .detalle-mascota-card .btn-primary:hover {
-    background-color: #4CA5A3;
-    border-color: #4CA5A3;
+    background-color: #d45d3c;
+    border-color: #d45d3c;
 }
 
-.detalle-mascota-card.card {
+/* Tarjetas de mascotas */
+.card-adopcion .card-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #e76f51;
+    text-align: center;
+}
+
+.card-adopcion .card-text {
+    font-size: 16px;
+    color: #5e5e5e;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.card-adopcion .btn-adoptar {
+    background-color: #e76f51;
+    color: white;
     border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 10px 30px;
+    font-weight: 500;
+    margin: 0 auto;
+    display: block;
+    border-radius: 25px;
 }
 
-/* media queries para responsive (IMPORTANTE) no eliminar nada porque se rompe la parte responsive. */
+/* Tarjetas de mascota simplificadas */
+.card-mascota {
+    border: none;
+    border-radius: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    margin-top: 16px;
+    padding-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-mascota .card-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #e76f51;
+    text-align: center;
+}
+
+.card-mascota .card-text {
+    font-size: 16px;
+    color: #5e5e5e;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.card-mascota .btn-adoptar {
+    background-color: #e76f51;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 25px;
+    font-weight: 500;
+    margin: 0 auto;
+    display: block;
+}
+
+.card-mascota .mascota-imagen {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+/* Filtros */
+.filtros {
+    max-width: 1000px;
+    margin: 0 auto 32px auto;
+    padding: 16px 24px;
+    background-color: #fff7f0;
+    border-radius: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.mascota-modal-img {
+    max-width: 100%;
+    height: auto;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto 10px auto;
+}
+
+/* 5.2 Donaciones */
+.donacion-hero {
+    background-image: url('../uploads/fondo_donacion.png');
+    background-size: cover;
+    background-position: center;
+    height: 300px;
+    position: relative;
+}
+
+.donacion-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3));
+    padding: 24px;
+    text-align: center;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 8px;
+}
+
+.donacion-overlay h1 {
+    font-size: 32px;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.donacion-overlay p {
+    font-size: 16px;
+    color: #ddd;
+}
+
+.donacion-hero-img {
+    position: relative;
+    width: 100%;
+    margin-bottom: 32px;
+}
+
+.donacion-hero-img .hero-img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.donacion-titulo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 24px 32px;
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.donacion-titulo h1 {
+    font-size: 35px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.donacion-titulo p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* 5.3 Login */
+.login-container {
+    display: flex;
+    height: 100vh;
+}
+
+.login-image {
+    width: 50%;
+    background-image: url('../../../uploads/mascostasinicio.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.login-form {
+    width: 50%;
+    background-color: #fff1e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+}
+
+.login-box {
+    background-color: white;
+    padding: 32px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.login-box h2 {
+    text-align: center;
+    color: #1B4965;
+    margin-bottom: 24px;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.login-footer a {
+    color: #1B74E4;
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ====================================================
+   6. FOOTER
+   ==================================================== */
+.footer {
+    background-color: #fff7f0;
+    color: #6a4e42;
+    font-size: 15px;
+    border-top: 1px solid #eee;
+    padding: 32px 0;
+    text-align: center;
+}
+
+.footer a {
+    color: #e76f51;
+    text-decoration: none;
+    margin: 0 8px;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+.footer-redes i {
+    font-size: 19px;
+    margin: 0 8px;
+}
+
+/* ====================================================
+   7. AJUSTES PARA MÓVIL
+   ==================================================== */
+/* Para tablets */
 @media (max-width: 991px) {
     /* ajustes del sidebar */
     .sidebar {
-        transform: translateX(-100%);
+        display: none;
     }
 
     .sidebar.active {
-        transform: translateX(0);
+        display: block;
     }
 
     .close-sidebar {
@@ -407,14 +876,15 @@ body {
         margin-top: 20px;
     }
 
-    .table td, .table th {
+    .table td,
+    .table th {
         padding: 8px;
-        font-size: 0.9rem;
+        font-size: 14px;
     }
 
     .table .btn {
         padding: 5px 10px;
-        font-size: 0.8rem;
+        font-size: 13px;
         margin: 2px;
     }
 
@@ -430,29 +900,59 @@ body {
     }
 
     .hero-text h1 {
-        font-size: 2rem;
+        font-size: 32px;
     }
 
     .hero-text p {
-        font-size: 1.2rem;
+        font-size: 19px;
     }
 }
 
-@media (max-width: 576px) {
-    /* ajustes para celulares mas chicos */
+/* PARTE MÓVIL */
+@media (max-width: 768px) {
+    /* ajustes para pantallas medianas */
     .hero-text h1 {
-        font-size: 1.5rem;
+        font-size: 29px;
     }
 
     .hero-text p {
-        font-size: 1rem;
+        font-size: 16px;
     }
 
-    .card-title {
-        font-size: 1.2rem;
+    .login-container {
+        flex-direction: column;
     }
 
-    /* ahustes de tabla para celulares */
+    .login-image {
+        height: 300px;
+        width: 100%;
+    }
+    
+    .login-form {
+        width: 100%;
+    }
+}
+
+/* Para celulares chicos */
+@media (max-width: 576px) {
+    /* ajustes para celulares */
+    .hero-section {
+        height: 250px;
+    }
+
+    .hero-text {
+        padding: 10px;
+    }
+
+    .hero-text h1 {
+        font-size: 24px;
+    }
+
+    .hero-text p {
+        font-size: 15px;
+    }
+
+    /* ajustes de tabla para celulares */
     .table th:nth-child(2),
     .table td:nth-child(2),
     .table th:nth-child(4),
@@ -467,6 +967,16 @@ body {
         margin-bottom: 5px;
     }
 
+    .card .btn {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .card-body {
+        padding: 16px 12px;
+    }
+
     .detalle-mascota-imagen {
         height: 300px;
     }
@@ -474,40 +984,10 @@ body {
     .detalle-mascota-card {
         height: auto;
     }
-}
 
-/* estado del body cuando el sidebar está activo en móvil */
-body.sidebar-open {
-    overflow: hidden;
-}
-
-/* animaciones */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.sidebar.active {
-    animation: fadeIn 0.3s ease;
-}
-
-.requirements-list {
-    list-style: none;
-    padding-left: 0;
-}
-.requirements-list li {
-    padding: 3px 0;
-}
-.requirements-list li::before {
-    content: '❌';
-    margin-right: 5px;
-}
-.requirements-list li.valid::before {
-    content: '✅';
-}
-.invalid {
-    color: #dc3545;
-}
-.valid {
-    color: #198754;
+    .btn-donar {
+        width: 100%;
+        display: block;
+        margin-top: 10px;
+    }
 }

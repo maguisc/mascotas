@@ -1,14 +1,40 @@
 <?php
+// Incluyo los archivos necesarios
 include '../config/database.php';
-include 'includes/header.php';
 include 'includes/sidebar.php';
 include 'auth/verificar_sesion.php';
+
+// Filtro por estado
+$estadoSeleccionado = $_GET['estado'] ?? 'Todas';
+
+// Armo la consulta según el filtro
+$sql = "SELECT * FROM mascotas";
+if ($estadoSeleccionado === "Sin publicar") {
+    $sql .= " WHERE estado IS NULL OR estado = ''";
+} elseif ($estadoSeleccionado !== "Todas") {
+    $sql .= " WHERE estado = '" . $conn->real_escape_string($estadoSeleccionado) . "'";
+}
+$sql .= " ORDER BY id_mascota DESC";
+
+// Ejecuto la consulta
+$result = $conn->query($sql);
 ?>
 
 <div class="content">
     <h2>Mascotas</h2>
     <a href="registrar_mascota.php" class="btn btn-nueva">Nueva</a>
     
+    <form method="GET" style="margin-bottom: 15px;">
+        <label for="estado">Filtrar por estado:</label>
+        <select name="estado" id="estado" onchange="this.form.submit()">
+            <option value="Todas" <?= ($_GET['estado'] ?? 'Todas') == 'Todas' ? 'selected' : '' ?>>Todas</option>
+            <option value="Sin publicar" <?= ($_GET['estado'] ?? '') == 'Sin publicar' ? 'selected' : '' ?>>Sin publicar</option>
+            <option value="Adopción" <?= ($_GET['estado'] ?? '') == 'Adopción' ? 'selected' : '' ?>>Adopción</option>
+            <option value="Tránsito" <?= ($_GET['estado'] ?? '') == 'Tránsito' ? 'selected' : '' ?>>Tránsito</option>
+            <option value="Perdido" <?= ($_GET['estado'] ?? '') == 'Perdido' ? 'selected' : '' ?>>Perdido</option>
+        </select>
+    </form>
+
     <div class="table-responsive">
         <table class="table">
             <thead>
@@ -23,33 +49,33 @@ include 'auth/verificar_sesion.php';
                 </tr>
             </thead>
             <tbody>
-                <?php
-                $sql = "SELECT * FROM mascotas ORDER BY id_mascota DESC";
-                $result = $conn->query($sql);
-
-                if ($result->num_rows > 0) {
-                    while($row = $result->fetch_assoc()) {
-                        echo "<tr>";
-                        echo "<td>" . $row["id_mascota"] . "</td>";
-                        echo "<td><img src='../" . $row["imagen"] . "' alt='Imagen de " . $row["nombre"] . "' style='width: 50px; height: 50px; object-fit: cover; border-radius: 5px;'></td>";
-                        echo "<td>" . $row["nombre"] . "</td>";
-                        echo "<td>" . $row["edad"] . "</td>";
-                        echo "<td>" . $row["estado"] . "</td>";
-                        echo "<td><button class='btn btn-publicar' onclick='abrirModalPublicacion(" . $row["id_mascota"] . ", \"" . $row["nombre"] . "\")'>Publicar</button></td>";
-                        echo "<td>
-                                <button class='btn btn-editar' onclick='editarMascota(" . $row["id_mascota"] . ")'>Editar</button>
-                                <button class='btn btn-eliminar' onclick='eliminarMascota(" . $row["id_mascota"] . ")'>Eliminar</button>
-                                </td>";
-                        echo "</tr>";
-                    }
-                }
-                ?>
+                <?php if ($result->num_rows > 0): ?>
+                    <?php while($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><?= $row["id_mascota"] ?></td>
+                            <td><img src="../<?= $row["imagen"] ?>" alt="Imagen de <?= $row["nombre"] ?>" 
+                                style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
+                            <td><?= $row["nombre"] ?></td>
+                            <td><?= $row["edad"] ?></td>
+                            <td><?= $row["estado"] ?></td>
+                            <td><button class="btn btn-publicar" 
+                                onclick="abrirModalPublicacion(<?= $row["id_mascota"] ?>, '<?= $row["nombre"] ?>')">
+                                Publicar</button></td>
+                            <td>
+                                <button class="btn btn-editar" onclick="editarMascota(<?= $row["id_mascota"] ?>)">Editar</button>
+                                <button class="btn btn-eliminar" onclick="eliminarMascota(<?= $row["id_mascota"] ?>)">Eliminar</button>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr><td colspan="7">No se encontraron resultados</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- modal de publicación -->
+<!-- Modal de publicación -->
 <div class="modal fade" id="modalPublicacion" tabindex="-1" aria-labelledby="modalPublicacionLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -71,31 +97,26 @@ include 'auth/verificar_sesion.php';
 </div>
 
 <script>
+// Función para abrir el modal de publicación
 function abrirModalPublicacion(id, nombre) {
     document.getElementById('mascotaId').value = id;
     document.getElementById('nombreMascota').textContent = nombre;
-    var modal = new bootstrap.Modal(document.getElementById('modalPublicacion'));
-    modal.show();
+    new bootstrap.Modal(document.getElementById('modalPublicacion')).show();
 }
 
+// Función para crear una publicación
 function crearPublicacion(tipo) {
     const mascotaId = document.getElementById('mascotaId').value;
     
     fetch('crear_publicacion.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `id_mascota=${mascotaId}&tipo=${tipo}`
     })
     .then(response => response.json())
     .then(data => {
-        if(data.success) {
-            alert('Publicación creada exitosamente');
-            location.reload();
-        } else {
-            alert('Error al crear la publicación: ' + data.message);
-        }
+        alert(data.success ? 'Publicación creada exitosamente' : 'Error: ' + data.message);
+        data.success && location.reload();
     })
     .catch(error => {
         console.error('Error:', error);
@@ -103,23 +124,18 @@ function crearPublicacion(tipo) {
     });
 }
 
+// Función para eliminar una mascota
 function eliminarMascota(id) {
     if (confirm('¿Estás seguro de que deseas eliminar esta mascota?')) {
         fetch('guardar_mascota.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: `accion=eliminar&id_mascota=${id}`
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                alert(data.message);
-                window.location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
+            alert(data.message);
+            data.success && window.location.reload();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -128,6 +144,7 @@ function eliminarMascota(id) {
     }
 }
 
+// Función para editar una mascota
 function editarMascota(id) {
     window.location.href = `registrar_mascota.php?id=${id}`;
 }
